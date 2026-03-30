@@ -9,6 +9,7 @@ const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.disable('x-powered-by');
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
@@ -30,10 +31,59 @@ db.exec(`CREATE TABLE IF NOT EXISTS orders (
 )`);
 
 // Admin Password (aus .env)
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || 'admin123').trim();
 
 // Simple Token Store
 const tokens = new Map();
+const loginAttempts = new Map();
+
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+
+function getClientIp(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string' && forwarded.length > 0) {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.ip || 'unknown';
+}
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const record = loginAttempts.get(ip);
+  if (!record) return false;
+
+  if (now - record.firstAttemptAt > LOGIN_WINDOW_MS) {
+    loginAttempts.delete(ip);
+    return false;
+  }
+
+  return record.count >= MAX_LOGIN_ATTEMPTS;
+}
+
+function recordFailedAttempt(ip) {
+  const now = Date.now();
+  const record = loginAttempts.get(ip);
+  if (!record || now - record.firstAttemptAt > LOGIN_WINDOW_MS) {
+    loginAttempts.set(ip, { count: 1, firstAttemptAt: now });
+    return;
+  }
+  record.count += 1;
+}
+
+function clearFailedAttempts(ip) {
+  loginAttempts.delete(ip);
+}
+
+function isValidAdminPassword(inputPassword) {
+  if (typeof inputPassword !== 'string' || inputPassword.length === 0) return false;
+
+  const provided = Buffer.from(inputPassword);
+  const expected = Buffer.from(ADMIN_PASSWORD);
+
+  if (provided.length !== expected.length) return false;
+  return crypto.timingSafeEqual(provided, expected);
+}
 
 // Token generieren
 function generateToken() {
@@ -59,20 +109,24 @@ function authenticateAdmin(req, res, next) {
 
 // ADMIN LOGIN ROUTE - MUSS VOR ALLEN ANDEREN ROUTES KOMMEN!
 app.post('/api/admin/login', (req, res) => {
-  console.log('Login versucht mit Passwort:', req.body.password);
+  const ip = getClientIp(req);
+
+  if (isRateLimited(ip)) {
+    return res.status(429).json({ message: 'Zu viele Login-Versuche. Bitte spaeter erneut versuchen.' });
+  }
+
   const { password } = req.body;
 
   if (!password) {
     return res.status(400).json({ message: 'Passwort erforderlich' });
   }
 
-  console.log('ADMIN_PASSWORD aus ENV:', ADMIN_PASSWORD);
-  console.log('Eingabe Passwort:', password);
-  console.log('Vergleich:', password === ADMIN_PASSWORD);
-
-  if (password !== ADMIN_PASSWORD) {
+  if (!isValidAdminPassword(password)) {
+    recordFailedAttempt(ip);
     return res.status(401).json({ message: 'Falsches Passwort' });
   }
+
+  clearFailedAttempts(ip);
 
   // Token erstellen und speichern
   const token = generateToken();
