@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const nodemailer = require('nodemailer');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = process.env.STRIPE_SECRET_KEY ? require('stripe')(process.env.STRIPE_SECRET_KEY) : null;
 const crypto = require('crypto');
 
 const app = express();
@@ -130,6 +130,9 @@ app.post('/api/orders', (req, res) => {
 
 // ── Stripe Zahlung ──
 app.post('/api/stripe/create-payment-intent', async (req, res) => {
+  if (!stripe) {
+    return res.status(503).json({error: 'Stripe ist nicht konfiguriert. Bitte STRIPE_SECRET_KEY setzen.'});
+  }
   try {
     const {amount} = req.body;
     const paymentIntent = await stripe.paymentIntents.create({
