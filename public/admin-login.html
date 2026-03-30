@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - MeinShop</title>
+  <style>
+    :root {
+      --primary: #1a1a2e;
+      --accent: #e94560;
+      --light: #f5f5f5;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+      padding: 40px;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .login-logo {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    .login-header h1 {
+      font-size: 24px;
+      color: var(--primary);
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .login-header p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+
+    .login-btn:hover {
+      background: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .login-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-message {
+      background: #ffe0e0;
+      color: #d32f2f;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #999;
+    }
+
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 30px 20px;
+      }
+
+      .login-header h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-header">
+      <div class="login-logo">🔐</div>
+      <h1>Admin Login</h1>
+      <p>Melden Sie sich an, um auf das Dashboard zuzugreifen</p>
+    </div>
+
+    <div id="errorMessage" class="error-message"></div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="password">Admin Passwort</label>
+        <input 
+          type="password" 
+          id="password" 
+          placeholder="Passwort eingeben..." 
+          required
+          autofocus
+        >
+      </div>
+
+      <button type="submit" class="login-btn" id="submitBtn">Anmelden</button>
+    </form>
+
+    <div class="login-footer">
+      <p>Sicherer Zugriff - Ihre Anmeldedaten sind geschützt</p>
+    </div>
+  </div>
+
+  <script>
+    // Login Handler
+    async function handleLogin(event) {
+      event.preventDefault();
+
+      const password = document.getElementById('password').value;
+      const submitBtn = document.getElementById('submitBtn');
+      const errorMessage = document.getElementById('errorMessage');
+
+      // Disable button
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Wird verarbeitet...';
+
+      try {
+        const response = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+
+        const text = await response.text();
+        console.log('Server response:', text);
+        
+        let result;
+        try {
+          result = JSON.parse(text);
+        } catch (e) {
+          console.error('JSON Parse Error:', e);
+          throw new Error('Server antwortete mit ungültigem Format: ' + text);
+        }
+
+        if (response.ok) {
+          // Token speichern
+          localStorage.setItem('adminToken', result.token);
+          
+          // Zur Admin-Seite redirect
+          window.location.href = '/admin.html';
+        } else {
+          // Fehler anzeigen
+          errorMessage.textContent = result.message || 'Falsches Passwort!';
+          errorMessage.classList.add('show');
+          document.getElementById('password').value = '';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Anmelden';
+        }
+      } catch (error) {
+        console.error('Login Fehler:', error);
+        errorMessage.textContent = 'Fehler: ' + error.message;
+        errorMessage.classList.add('show');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Anmelden';
+      }
+    }
+
+    // Token in localStorage prüfen - wenn vorhanden, direkt zur Admin gehen
+    function checkExistingToken() {
+      const token = localStorage.getItem('adminToken');
+      if (token && token.length > 0) {
+        window.location.href = '/admin.html';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', checkExistingToken);
+  </script>
+</body>
+</html>

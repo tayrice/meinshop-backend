@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MeinShop - Premium Online Shop</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <div class="logo">
+        <span class="logo-text">MeinShop</span>
+      </div>
+      <div class="nav-menu">
+        <a href="#kategorien" class="nav-link">Kategorien</a>
+        <a href="#produkte" class="nav-link">Produkte</a>
+        <a href="#about" class="nav-link">Über uns</a>
+        <button class="cart-btn" onclick="toggleCart()">
+          🛒 Warenkorb <span id="cartCount" class="badge">0</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Entdecken Sie Premium-Produkte</h1>
+      <p>Hochwertige Produkte direkt zu Ihnen nach Hause – mit bestem Service und fairen Preisen</p>
+      <div class="hero-buttons">
+        <button class="btn-primary" onclick="scrollToSection('produkte')">Jetzt Einkaufen</button>
+        <button class="btn-secondary" onclick="scrollToSection('kategorien')">Kategorien Erkunden</button>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="emoji-grid">🎧 ⌚ 🛍️ 📱 💻 🎮</div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="about">
+    <div class="container">
+      <h2>Warum MeinShop?</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Blitzschnelle Lieferung</h3>
+          <p>Sichere dir schnelle und zuverlässige Lieferung direkt zu dir nach Hause</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💯</div>
+          <h3>Qualität Garantiert</h3>
+          <p>Alle Produkte werden sorgfältig ausgewählt und geprüft</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💰</div>
+          <h3>Faire Preise</h3>
+          <p>Beste Preise-Leistung mit regelmäßigen Angeboten</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>Sichere Zahlung</h3>
+          <p>Moderne Zahlungsoptionen mit Stripe und PayPal</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📞</div>
+          <h3>Kundenservice</h3>
+          <p>Wir sind immer für dich da – bei Fragen und Problemen</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">✅</div>
+          <h3>100% Zufrieden</h3>
+          <p>Geld-zurück-Garantie wenn Sie nicht zufrieden sind</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Kategorien Section -->
+  <section class="categories-section" id="kategorien">
+    <div class="container">
+      <h2>Entdecken Sie unsere Kategorien</h2>
+      <div class="categories-grid">
+        <div class="category-card" onclick="filterByCategory('electronics')">
+          <div class="category-icon">⚙️</div>
+          <h3>Elektronik</h3>
+          <p>Die neueste Technologie</p>
+        </div>
+        <div class="category-card" onclick="filterByCategory('clothing')">
+          <div class="category-icon">👕</div>
+          <h3>Kleidung</h3>
+          <p>Mode & Komfort</p>
+        </div>
+        <div class="category-card" onclick="filterByCategory('home')">
+          <div class="category-icon">🏠</div>
+          <h3>Haushalt</h3>
+          <p>Für den täglichen Gebrauch</p>
+        </div>
+        <div class="category-card" onclick="filterByCategory('books')">
+          <div class="category-icon">📖</div>
+          <h3>Bücher</h3>
+          <p>Wissenswertes zum Lesen</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Produkte Section -->
+  <section class="products-section" id="produkte">
+    <div class="container">
+      <h2>Unsere Bestseller</h2>
+      
+      <!-- Filter & Search -->
+      <div class="filter-bar">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Produkte suchen...">
+          <span class="search-icon">🔍</span>
+        </div>
+        <div class="filter-controls">
+          <select id="categoryFilter" onchange="applyFilters()">
+            <option value="all">Alle Kategorien</option>
+            <option value="electronics">Elektronik</option>
+            <option value="clothing">Kleidung</option>
+            <option value="home">Haushalt</option>
+            <option value="books">Bücher</option>
+          </select>
+          <input type="range" id="priceFilter" min="0" max="300" value="300" onchange="applyFilters()">
+          <span id="priceValue">bis 300€</span>
+          <button onclick="resetFilters()" class="btn-reset">✕ Zurücksetzen</button>
+        </div>
+      </div>
+
+      <!-- Produkte Grid -->
+      <div id="productList" class="product-grid"></div>
+    </div>
+  </section>
+
+  <!-- Warenkorb Sidebar -->
+  <div id="cartSidebar" class="cart-sidebar">
+    <div class="cart-header">
+      <h2>Warenkorb</h2>
+      <button class="close-btn" onclick="toggleCart()">✕</button>
+    </div>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-summary">
+      <div class="summary-row">
+        <span>Gesamtbetrag:</span>
+        <strong id="cartTotal">0,00 €</strong>
+      </div>
+      <button onclick="goToCheckout()" class="btn-checkout">Zur Kasse</button>
+    </div>
+  </div>
+
+  <!-- Modal für Checkout -->
+  <div id="checkoutModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeCheckout()">&times;</span>
+      <h2>Zur Kasse</h2>
+      
+      <form id="checkoutForm">
+        <div class="form-section">
+          <h3>Versandinformationen</h3>
+          <input type="text" id="name" placeholder="Vollständiger Name" required>
+          <input type="email" id="email" placeholder="E-Mail Adresse" required>
+          <input type="text" id="address" placeholder="Straße & Hausnummer" required>
+        </div>
+        
+        <div class="form-section">
+          <h3>Zahlungsmethode</h3>
+          <div class="payment-methods">
+            <label class="payment-option">
+              <input type="radio" name="payment" value="stripe" checked>
+              <span>💳 Stripe (Kreditkarte)</span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="payment" value="paypal">
+              <span>🅿️ PayPal</span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="payment" value="bank">
+              <span>🏦 Banküberweisung</span>
+            </label>
+          </div>
+
+          <!-- Stripe -->
+          <div id="stripeContainer" class="payment-form">
+            <div id="card-element"></div>
+            <div id="card-errors" role="alert"></div>
+          </div>
+
+          <!-- PayPal -->
+          <div id="paypalContainer" class="payment-form" style="display:none;">
+            <div id="paypal-button-container"></div>
+          </div>
+        </div>
+
+        <div class="order-summary">
+          <h3>Order Summary</h3>
+          <div id="checkoutItems"></div>
+          <div class="summary-total">
+            <span>Gesamtbetrag:</span>
+            <strong id="checkoutTotal">0,00 €</strong>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="payButton">Jetzt Bezahlen</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>MeinShop</h4>
+          <p>Ihr vertrauenswürdiger Partner für Premium-Produkte seit 2025.</p>
+        </div>
+        <div class="footer-section">
+          <h4>Links</h4>
+          <ul>
+            <li><a href="#produkte">Produkte</a></li>
+            <li><a href="/admin.html">Admin</a></li>
+            <li><a href="#">Impressum</a></li>
+            <li><a href="#">Datenschutz</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Kontakt</h4>
+          <p>support@meinshop.de</p>
+          <p>Mo-Fr 9:00-17:00 Uhr</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 MeinShop. Alle Rechte vorbehalten.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
