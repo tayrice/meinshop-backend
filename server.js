@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
+const Database = require('better-sqlite3');
 const nodemailer = require('nodemailer');
 const stripe = process.env.STRIPE_SECRET_KEY ? require('stripe')(process.env.STRIPE_SECRET_KEY) : null;
 const crypto = require('crypto');
@@ -12,6 +12,22 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
+
+// ── Datenbank Setup ──
+const db = new Database('./shop.db');
+db.pragma('journal_mode = WAL');
+
+db.exec(`CREATE TABLE IF NOT EXISTS orders (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT,
+  email TEXT,
+  address TEXT,
+  items TEXT,
+  total REAL,
+  payment_method TEXT,
+  status TEXT DEFAULT 'pending',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`);
 
 // Admin Password (aus .env)
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
@@ -68,23 +84,6 @@ app.post('/api/admin/login', (req, res) => {
   res.json({ token });
 });
 
-// ── Datenbank Setup ──
-const db = new sqlite3.Database('./shop.db');
-
-db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS orders (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    email TEXT,
-    address TEXT,
-    items TEXT,
-    total REAL,
-    payment_method TEXT,
-    status TEXT DEFAULT 'pending',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )`);
-});
-
 // ── Produkte ──
 const PRODUCTS = [
   {id:1, name:'Kopfhörer Pro', price:129, stock:10},
@@ -108,24 +107,27 @@ app.get('/api/products', (req, res) => {
 
 // Geschützte Route - Admin only
 app.get('/api/orders', authenticateAdmin, (req, res) => {
-  db.all('SELECT * FROM orders ORDER BY created_at DESC', (err, rows) => {
-    if (err) return res.status(500).json({error: err.message});
+  try {
+    const rows = db.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
     res.json(rows);
-  });
+  } catch (err) {
+    res.status(500).json({error: err.message});
+  }
 });
 
 // ── Bestellung speichern ──
 app.post('/api/orders', (req, res) => {
-  const {name, email, address, items, total, payment_method} = req.body;
-  db.run(
-    'INSERT INTO orders (name, email, address, items, total, payment_method) VALUES (?,?,?,?,?,?)',
-    [name, email, address, JSON.stringify(items), total, payment_method],
-    function(err) {
-      if (err) return res.status(500).json({error: err.message});
-      sendConfirmationEmail(email, name, items, total);
-      res.json({success: true, orderId: this.lastID});
-    }
-  );
+  try {
+    const {name, email, address, items, total, payment_method} = req.body;
+    const result = db.prepare(
+      'INSERT INTO orders (name, email, address, items, total, payment_method) VALUES (?,?,?,?,?,?)'
+    ).run(name, email, address, JSON.stringify(items), total, payment_method);
+    
+    sendConfirmationEmail(email, name, items, total);
+    res.json({success: true, orderId: result.lastInsertRowid});
+  } catch (err) {
+    res.status(500).json({error: err.message});
+  }
 });
 
 // ── Stripe Zahlung ──
