@@ -158,8 +158,53 @@ function addToCart(productId, btn) {
   }
 
   saveCart();
+  animateProductToCart(btn);
   updateCartUI();
-  showNotification('✓ Zum Warenkorb hinzugefügt!');
+  animateCartButton();
+}
+
+function animateProductToCart(sourceButton) {
+  const cartButton = document.querySelector('.cart-btn');
+  const productCard = sourceButton?.closest('.product-card');
+  const productImage = productCard?.querySelector('.product-image');
+
+  if (!cartButton || !productImage) {
+    return;
+  }
+
+  const sourceRect = productImage.getBoundingClientRect();
+  const targetRect = cartButton.getBoundingClientRect();
+
+  const flyingItem = document.createElement('div');
+  flyingItem.className = 'fly-to-cart-item';
+  flyingItem.textContent = productImage.textContent.trim() || '🛍️';
+
+  flyingItem.style.left = `${sourceRect.left + sourceRect.width / 2}px`;
+  flyingItem.style.top = `${sourceRect.top + sourceRect.height / 2}px`;
+  flyingItem.style.setProperty('--fly-x', `${targetRect.left + targetRect.width / 2 - (sourceRect.left + sourceRect.width / 2)}px`);
+  flyingItem.style.setProperty('--fly-y', `${targetRect.top + targetRect.height / 2 - (sourceRect.top + sourceRect.height / 2)}px`);
+
+  document.body.appendChild(flyingItem);
+  flyingItem.addEventListener('animationend', () => flyingItem.remove(), { once: true });
+}
+
+function animateCartButton() {
+  const cartButton = document.querySelector('.cart-btn');
+  const cartBadge = document.getElementById('cartCount');
+
+  if (!cartButton) {
+    return;
+  }
+
+  cartButton.classList.remove('cart-animate');
+  void cartButton.offsetWidth;
+  cartButton.classList.add('cart-animate');
+
+  if (cartBadge) {
+    cartBadge.classList.remove('badge-animate');
+    void cartBadge.offsetWidth;
+    cartBadge.classList.add('badge-animate');
+  }
 }
 
 // Warenkorb-UI aktualisieren
