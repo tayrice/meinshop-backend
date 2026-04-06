@@ -29,8 +29,15 @@ Bearbeite die `.env` Datei:
 ```env
 PORT=3000
 
+# Pflicht: Admin Login Passwort
+ADMIN_PASSWORD=bitte_ein_sicheres_passwort
+
+# Erlaubte Browser-Origin(s), komma-separiert
+CORS_ORIGIN=http://localhost:3000
+
 # Stripe API Keys (von https://stripe.com/docs)
 STRIPE_SECRET_KEY=sk_test_dein_key_hier
+STRIPE_PUBLISHABLE_KEY=pk_test_dein_key_hier
 
 # PayPal Credentials (von https://developer.paypal.com)
 PAYPAL_CLIENT_ID=dein_client_id

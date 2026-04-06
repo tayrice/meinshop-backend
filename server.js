@@ -8,9 +8,34 @@ const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const STRIPE_PUBLISHABLE_KEY = (process.env.STRIPE_PUBLISHABLE_KEY || '').trim();
+const ALLOWED_PAYMENT_METHODS = new Set(['stripe', 'paypal', 'bank']);
+
+class ValidationError extends Error {}
+
+const rawAdminPassword = process.env.ADMIN_PASSWORD;
+if (!rawAdminPassword || !rawAdminPassword.trim()) {
+  throw new Error('ADMIN_PASSWORD fehlt in der .env und ist zwingend erforderlich.');
+}
+const ADMIN_PASSWORD = rawAdminPassword.trim();
+
+const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000,http://127.0.0.1:3000')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error('Origin nicht erlaubt durch CORS'));
+  }
+};
 
 app.disable('x-powered-by');
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static('public'));
 
@@ -29,9 +54,6 @@ db.exec(`CREATE TABLE IF NOT EXISTS orders (
   status TEXT DEFAULT 'pending',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`);
-
-// Admin Password (aus .env)
-const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || 'admin123').trim();
 
 // Simple Token Store
 const tokens = new Map();
@@ -154,9 +176,75 @@ const PRODUCTS = [
   {id:12, name:'Fahrradhelm', price:69, stock:9},
 ];
 
+const PRODUCTS_BY_ID = new Map(PRODUCTS.map((product) => [product.id, product]));
+
+function parseOrderPayload(payload) {
+  const name = typeof payload.name === 'string' ? payload.name.trim() : '';
+  const email = typeof payload.email === 'string' ? payload.email.trim() : '';
+  const address = typeof payload.address === 'string' ? payload.address.trim() : '';
+  const paymentMethod = typeof payload.payment_method === 'string' ? payload.payment_method : '';
+  const items = Array.isArray(payload.items) ? payload.items : [];
+
+  if (!name || !email || !address) {
+    throw new ValidationError('Name, E-Mail und Adresse sind erforderlich.');
+  }
+
+  if (!ALLOWED_PAYMENT_METHODS.has(paymentMethod)) {
+    throw new ValidationError('Ungültige Zahlungsmethode.');
+  }
+
+  if (items.length === 0) {
+    throw new ValidationError('Warenkorb ist leer.');
+  }
+
+  let computedTotal = 0;
+  const normalizedItems = items.map((item) => {
+    const id = Number(item.id);
+    const qty = Number(item.qty);
+
+    if (!Number.isInteger(id) || !Number.isInteger(qty) || qty <= 0) {
+      throw new ValidationError('Ungültige Produktdaten im Warenkorb.');
+    }
+
+    const product = PRODUCTS_BY_ID.get(id);
+    if (!product) {
+      throw new ValidationError('Ein Produkt im Warenkorb existiert nicht mehr.');
+    }
+
+    if (qty > product.stock) {
+      throw new ValidationError(`Nicht genug Bestand fuer ${product.name}.`);
+    }
+
+    computedTotal += product.price * qty;
+    return {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      qty
+    };
+  });
+
+  return {
+    name,
+    email,
+    address,
+    payment_method: paymentMethod,
+    items: normalizedItems,
+    total: Number(computedTotal.toFixed(2))
+  };
+}
+
 // ── Routen ──
 app.get('/api/products', (req, res) => {
   res.json(PRODUCTS);
+});
+
+app.get('/api/config/public', (req, res) => {
+  const stripeEnabled = Boolean(stripe && STRIPE_PUBLISHABLE_KEY);
+  res.json({
+    stripeEnabled,
+    stripePublishableKey: stripeEnabled ? STRIPE_PUBLISHABLE_KEY : null
+  });
 });
 
 // Geschützte Route - Admin only
@@ -172,15 +260,31 @@ app.get('/api/orders', authenticateAdmin, (req, res) => {
 // ── Bestellung speichern ──
 app.post('/api/orders', (req, res) => {
   try {
-    const {name, email, address, items, total, payment_method} = req.body;
+    const parsedOrder = parseOrderPayload(req.body);
+    const clientTotal = Number(req.body.total);
+
+    if (Number.isFinite(clientTotal) && Math.abs(clientTotal - parsedOrder.total) > 0.01) {
+      return res.status(400).json({error: 'Der Gesamtbetrag stimmt nicht mit dem Warenkorb ueberein.'});
+    }
+
     const result = db.prepare(
       'INSERT INTO orders (name, email, address, items, total, payment_method) VALUES (?,?,?,?,?,?)'
-    ).run(name, email, address, JSON.stringify(items), total, payment_method);
+    ).run(
+      parsedOrder.name,
+      parsedOrder.email,
+      parsedOrder.address,
+      JSON.stringify(parsedOrder.items),
+      parsedOrder.total,
+      parsedOrder.payment_method
+    );
     
-    sendConfirmationEmail(email, name, items, total);
+    sendConfirmationEmail(parsedOrder.email, parsedOrder.name, parsedOrder.items, parsedOrder.total);
     res.json({success: true, orderId: result.lastInsertRowid});
   } catch (err) {
-    res.status(500).json({error: err.message});
+    if (err instanceof ValidationError) {
+      return res.status(400).json({error: err.message});
+    }
+    res.status(500).json({error: 'Bestellung konnte nicht gespeichert werden.'});
   }
 });
 
@@ -190,7 +294,11 @@ app.post('/api/stripe/create-payment-intent', async (req, res) => {
     return res.status(503).json({error: 'Stripe ist nicht konfiguriert. Bitte STRIPE_SECRET_KEY setzen.'});
   }
   try {
-    const {amount} = req.body;
+    const amount = Number(req.body.amount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return res.status(400).json({error: 'Ungueltiger Zahlungsbetrag.'});
+    }
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100),
       currency: 'eur',

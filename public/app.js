@@ -39,7 +39,7 @@ function filterByCategory(category) {
 // Initialisierung
 document.addEventListener('DOMContentLoaded', async () => {
   await loadProducts();
-  setupStripe();
+  await setupStripe();
   setupPaymentMethodChange();
   displayProducts(products);
   loadCart();
@@ -56,10 +56,21 @@ async function loadProducts() {
 }
 
 // Stripe Setup
-function setupStripe() {
-  const publicKey = 'pk_test_51234567890'; // Ersetze mit echtem Key
-  if (publicKey && publicKey !== 'pk_test_51234567890') {
-    stripe = Stripe(publicKey);
+async function setupStripe() {
+  try {
+    const response = await fetch('/api/config/public');
+    if (!response.ok) {
+      disableStripePayment();
+      return;
+    }
+
+    const config = await response.json();
+    if (!config.stripeEnabled || !config.stripePublishableKey) {
+      disableStripePayment();
+      return;
+    }
+
+    stripe = Stripe(config.stripePublishableKey);
     elements = stripe.elements();
     cardElement = elements.create('card');
     cardElement.mount('#card-element');
@@ -72,20 +83,52 @@ function setupStripe() {
         displayError.textContent = '';
       }
     });
+  } catch (error) {
+    console.error('Stripe-Konfiguration konnte nicht geladen werden:', error);
+    disableStripePayment();
+  }
+}
+
+function disableStripePayment() {
+  const stripeInput = document.querySelector('input[name="payment"][value="stripe"]');
+  const stripeOption = stripeInput?.closest('.payment-option');
+  const stripeContainer = document.getElementById('stripeContainer');
+  const paypalInput = document.querySelector('input[name="payment"][value="paypal"]');
+  const bankInput = document.querySelector('input[name="payment"][value="bank"]');
+
+  if (stripeOption) {
+    stripeOption.style.display = 'none';
+  }
+
+  if (stripeContainer) {
+    stripeContainer.style.display = 'none';
+  }
+
+  if (stripeInput?.checked) {
+    if (paypalInput) {
+      paypalInput.checked = true;
+    } else if (bankInput) {
+      bankInput.checked = true;
+    }
   }
 }
 
 // Payment Method wechsel
 function setupPaymentMethodChange() {
+  const setPaymentVisibility = (method) => {
+    document.getElementById('stripeContainer').style.display = method === 'stripe' ? 'block' : 'none';
+    document.getElementById('paypalContainer').style.display = method === 'paypal' ? 'block' : 'none';
+  };
+
   const paymentRadios = document.querySelectorAll('input[name="payment"]');
   paymentRadios.forEach(radio => {
     radio.addEventListener('change', function() {
-      document.getElementById('stripeContainer').style.display = 
-        this.value === 'stripe' ? 'block' : 'none';
-      document.getElementById('paypalContainer').style.display = 
-        this.value === 'paypal' ? 'block' : 'none';
+      setPaymentVisibility(this.value);
     });
   });
+
+  const selectedPayment = document.querySelector('input[name="payment"]:checked');
+  setPaymentVisibility(selectedPayment ? selectedPayment.value : 'bank');
 }
 
 // Produkte anzeigen
