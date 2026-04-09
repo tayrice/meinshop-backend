@@ -1150,8 +1150,69 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .filter-bar {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
   .product-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
+    justify-items: center;
+  }
+
+  .product-card {
+    width: min(100%, 340px);
+  }
+
+  .product-image {
+    height: 182px;
+    padding-bottom: 18px;
+  }
+
+  .product-image::before {
+    width: 92px;
+    height: 136px;
+  }
+
+  .product-image::after {
+    width: 58px;
+    height: 38px;
+    top: 22px;
+  }
+
+  .product-info {
+    padding: 13px;
+    gap: 6px;
+  }
+
+  .product-name {
+    min-height: 30px;
+    font-size: 14px;
+  }
+
+  .product-price {
+    font-size: 17px;
+  }
+
+  .quantity-selector {
+    gap: 6px;
+  }
+
+  .quantity-selector button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .quantity-selector input {
+    width: 50px;
+    padding: 5px;
+    font-size: 13px;
+  }
+
+  .btn-add {
+    padding: 9px 11px;
+    font-size: 11px;
   }
 
   .cart-sidebar {
