@@ -343,32 +343,23 @@ function closeCheckout() {
 }
 
 // Filter
-document.getElementById('priceFilter')?.addEventListener('input', function() {
-  document.getElementById('priceValue').textContent = `bis ${this.value} EUR`;
-  applyFilters();
-});
-
 document.getElementById('categoryFilter')?.addEventListener('change', applyFilters);
 document.getElementById('searchInput')?.addEventListener('input', applyFilters);
 
 function applyFilters() {
-  const maxPrice = parseInt(document.getElementById('priceFilter').value);
   const category = document.getElementById('categoryFilter').value;
   const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
   const filtered = products.filter(product => {
-    const matchPrice = product.price <= maxPrice;
     const matchCategory = category === 'all' || productCategories[product.name] === category;
     const matchSearch = product.name.toLowerCase().includes(searchTerm);
-    return matchPrice && matchCategory && matchSearch;
+    return matchCategory && matchSearch;
   });
 
   displayProducts(filtered);
 }
 
 function resetFilters() {
-  document.getElementById('priceFilter').value = 180;
-  document.getElementById('priceValue').textContent = 'bis 180 EUR';
   document.getElementById('categoryFilter').value = 'all';
   document.getElementById('searchInput').value = '';
   displayProducts(products);
