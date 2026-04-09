@@ -519,7 +519,6 @@ body {
 
 .search-box input,
 .filter-controls select,
-.filter-controls input[type='range'],
 .modal-content input,
 .modal-content select,
 .quantity-selector input {
@@ -553,8 +552,7 @@ body {
   gap: 12px;
 }
 
-.filter-controls select,
-.filter-controls input[type='range'] {
+.filter-controls select {
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 10px 12px;
@@ -563,13 +561,6 @@ body {
 
 .filter-controls select {
   min-width: 220px;
-}
-
-#priceValue {
-  color: #6b5d50;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .product-grid {
