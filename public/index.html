@@ -3,141 +3,157 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MeinShop - Premium Online Shop</title>
+  <title>COTYORA - Premium Skin Serum</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <!-- Navigation -->
+  <div class="topbar">Kostenloser Versand ab 45 EUR - Dermatologisch getestet</div>
+
   <nav class="navbar">
     <div class="navbar-container">
       <div class="logo">
-        <span class="logo-text">MeinShop</span>
+        <span class="logo-mark">C</span>
+        <span class="logo-text">COTYORA</span>
       </div>
       <div class="nav-menu">
-        <a href="#kategorien" class="nav-link">Kategorien</a>
-        <a href="#produkte" class="nav-link">Produkte</a>
-        <a href="#about" class="nav-link">Über uns</a>
+        <a href="#neuheiten" class="nav-link">Neuheiten</a>
+        <a href="#produkte" class="nav-link">Seren</a>
+        <a href="#kategorien" class="nav-link">Pflegewelten</a>
+        <a href="#about" class="nav-link">Support</a>
         <button class="cart-btn" onclick="toggleCart()">
-          🛒 Warenkorb <span id="cartCount" class="badge">0</span>
+          Warenkorb <span id="cartCount" class="badge">0</span>
         </button>
       </div>
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-content">
-      <h1>Entdecken Sie Premium-Produkte</h1>
-      <p>Hochwertige Produkte direkt zu Ihnen nach Hause – mit bestem Service und fairen Preisen</p>
-      <div class="hero-buttons">
-        <button class="btn-primary" onclick="scrollToSection('produkte')">Jetzt Einkaufen</button>
-        <button class="btn-secondary" onclick="scrollToSection('kategorien')">Kategorien Erkunden</button>
-      </div>
-    </div>
-    <div class="hero-image">
-      <div class="emoji-grid">🎧 ⌚ 🛍️ 📱 💻 🎮</div>
+  <section class="quick-filters" id="neuheiten">
+    <div class="container quick-filters-row">
+      <button class="chip" type="button" onclick="resetFilters()">Alle Seren</button>
+      <button class="chip" type="button" onclick="filterByCategory('hydration')">Hydration</button>
+      <button class="chip" type="button" onclick="filterByCategory('antiaging')">Anti-Aging</button>
+      <button class="chip" type="button" onclick="filterByCategory('brightening')">Glow</button>
+      <button class="chip" type="button" onclick="filterByCategory('sensitive')">Sensitive</button>
+      <button class="chip" type="button" onclick="filterByCategory('sets')">Sets</button>
+      <button class="chip" type="button" onclick="applyFilters()">Bestseller</button>
     </div>
   </section>
 
-  <!-- Features Section -->
+  <section class="hero">
+    <div class="hero-content reveal-up">
+      <p class="eyebrow">COTYORA SKIN SERUM</p>
+      <h1>Pure Care.<br>Timeless Glow.</h1>
+      <p>Hochkonzentrierte Wirkstoffe mit seidiger Textur. Entwickelt fur sichtbar glattere, strahlende Haut in jeder Routine.</p>
+      <div class="hero-buttons">
+        <button class="btn-primary" onclick="scrollToSection('produkte')">Jetzt entdecken</button>
+        <button class="btn-secondary" onclick="scrollToSection('about')">Unsere Formel</button>
+      </div>
+    </div>
+
+    <div class="hero-stage reveal-up delay-1" aria-hidden="true">
+      <div class="hero-glow"></div>
+      <div class="hero-bottle">
+        <div class="bottle-cap"></div>
+        <div class="bottle-neck"></div>
+        <div class="bottle-body">
+          <span class="bottle-brand">COTYORA</span>
+          <span class="bottle-sub">Skin Serum</span>
+        </div>
+      </div>
+      <div class="hero-box">
+        <span>COTYORA</span>
+        <span>PURE CARE</span>
+      </div>
+    </div>
+  </section>
+
   <section class="features" id="about">
     <div class="container">
-      <h2>Warum MeinShop?</h2>
+      <h2>Warum COTYORA?</h2>
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon">⚡</div>
-          <h3>Blitzschnelle Lieferung</h3>
-          <p>Sichere dir schnelle und zuverlässige Lieferung direkt zu dir nach Hause</p>
+          <div class="feature-icon">01</div>
+          <h3>Peptide Complex</h3>
+          <p>Unterstutzt die Hautelastizitat und sorgt fur eine glattere, gefestigte Hautstruktur.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">💯</div>
-          <h3>Qualität Garantiert</h3>
-          <p>Alle Produkte werden sorgfältig ausgewählt und geprüft</p>
+          <div class="feature-icon">02</div>
+          <h3>Hyaluron Layers</h3>
+          <p>Mehrstufige Feuchtigkeitsbindung fur langanhaltenden Komfort und frischen Glow.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">💰</div>
-          <h3>Faire Preise</h3>
-          <p>Beste Preise-Leistung mit regelmäßigen Angeboten</p>
+          <div class="feature-icon">03</div>
+          <h3>Vitamin C Derivat</h3>
+          <p>Verfeinert den Teint sichtbar und schenkt deiner Haut ein gleichmassiges, klares Finish.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🎯</div>
-          <h3>Sichere Zahlung</h3>
-          <p>Moderne Zahlungsoptionen mit Stripe und PayPal</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📞</div>
-          <h3>Kundenservice</h3>
-          <p>Wir sind immer für dich da – bei Fragen und Problemen</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">✅</div>
-          <h3>100% Zufrieden</h3>
-          <p>Geld-zurück-Garantie wenn Sie nicht zufrieden sind</p>
+          <div class="feature-icon">04</div>
+          <h3>Clean Formulation</h3>
+          <p>Ohne Mikroplastik, mit hautfreundlicher Rezeptur und dermatologisch getestet.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Kategorien Section -->
   <section class="categories-section" id="kategorien">
     <div class="container">
-      <h2>Entdecken Sie unsere Kategorien</h2>
+      <h2>Pflegewelten</h2>
       <div class="categories-grid">
-        <div class="category-card" onclick="filterByCategory('electronics')">
-          <div class="category-icon">⚙️</div>
-          <h3>Elektronik</h3>
-          <p>Die neueste Technologie</p>
+        <div class="category-card" onclick="filterByCategory('hydration')">
+          <div class="category-icon">Hydra</div>
+          <h3>Intense Hydration</h3>
+          <p>Feuchtigkeit fur trockene und normale Haut.</p>
         </div>
-        <div class="category-card" onclick="filterByCategory('clothing')">
-          <div class="category-icon">👕</div>
-          <h3>Kleidung</h3>
-          <p>Mode & Komfort</p>
+        <div class="category-card" onclick="filterByCategory('antiaging')">
+          <div class="category-icon">Lift</div>
+          <h3>Age Defense</h3>
+          <p>Straffende Formeln fur ein ebenmassiges Hautbild.</p>
         </div>
-        <div class="category-card" onclick="filterByCategory('home')">
-          <div class="category-icon">🏠</div>
-          <h3>Haushalt</h3>
-          <p>Für den täglichen Gebrauch</p>
+        <div class="category-card" onclick="filterByCategory('brightening')">
+          <div class="category-icon">Glow</div>
+          <h3>Radiance Boost</h3>
+          <p>Leuchtkraft und Ebenmassigkeit fur matte Haut.</p>
         </div>
-        <div class="category-card" onclick="filterByCategory('books')">
-          <div class="category-icon">📖</div>
-          <h3>Bücher</h3>
-          <p>Wissenswertes zum Lesen</p>
+        <div class="category-card" onclick="filterByCategory('sensitive')">
+          <div class="category-icon">Calm</div>
+          <h3>Sensitive Care</h3>
+          <p>Beruhigende Texturen fur sensible Hauttypen.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Produkte Section -->
   <section class="products-section" id="produkte">
     <div class="container">
-      <h2>Unsere Bestseller</h2>
-      
-      <!-- Filter & Search -->
+      <h2>Bestseller Seren</h2>
+
       <div class="filter-bar">
         <div class="search-box">
-          <input type="text" id="searchInput" placeholder="Produkte suchen...">
-          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Serum suchen...">
+          <span class="search-icon">Suchen</span>
         </div>
         <div class="filter-controls">
           <select id="categoryFilter" onchange="applyFilters()">
             <option value="all">Alle Kategorien</option>
-            <option value="electronics">Elektronik</option>
-            <option value="clothing">Kleidung</option>
-            <option value="home">Haushalt</option>
-            <option value="books">Bücher</option>
+            <option value="hydration">Hydration</option>
+            <option value="antiaging">Anti-Aging</option>
+            <option value="brightening">Glow</option>
+            <option value="sensitive">Sensitive</option>
+            <option value="sets">Sets</option>
           </select>
-          <input type="range" id="priceFilter" min="0" max="300" value="300" onchange="applyFilters()">
-          <span id="priceValue">bis 300€</span>
+          <input type="range" id="priceFilter" min="0" max="180" value="180" onchange="applyFilters()">
+          <span id="priceValue">bis 180 EUR</span>
           <button onclick="resetFilters()" class="btn-reset">✕ Zurücksetzen</button>
         </div>
       </div>
 
-      <!-- Produkte Grid -->
       <div id="productList" class="product-grid"></div>
     </div>
   </section>
 
-  <!-- Warenkorb Sidebar -->
   <div id="cartSidebar" class="cart-sidebar">
     <div class="cart-header">
       <h2>Warenkorb</h2>
@@ -153,7 +169,6 @@
     </div>
   </div>
 
-  <!-- Modal für Checkout -->
   <div id="checkoutModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeCheckout()">&times;</span>
@@ -172,15 +187,15 @@
           <div class="payment-methods">
             <label class="payment-option">
               <input type="radio" name="payment" value="stripe" checked>
-              <span>💳 Stripe (Kreditkarte)</span>
+              <span>Stripe (Kreditkarte)</span>
             </label>
             <label class="payment-option">
               <input type="radio" name="payment" value="paypal">
-              <span>🅿️ PayPal</span>
+              <span>PayPal</span>
             </label>
             <label class="payment-option">
               <input type="radio" name="payment" value="bank">
-              <span>🏦 Banküberweisung</span>
+              <span>Bankuberweisung</span>
             </label>
           </div>
 
@@ -215,26 +230,26 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-section">
-          <h4>MeinShop</h4>
-          <p>Ihr vertrauenswürdiger Partner für Premium-Produkte seit 2025.</p>
+          <h4>COTYORA</h4>
+          <p>Premium Skin Serum mit klarer Formel fur eine moderne, wirksame Pflege-Routine.</p>
         </div>
         <div class="footer-section">
           <h4>Links</h4>
           <ul>
-            <li><a href="#produkte">Produkte</a></li>
+            <li><a href="#produkte">Seren</a></li>
             <li><a href="/admin.html">Admin</a></li>
-            <li><a href="#">Impressum</a></li>
+            <li><a href="#">Versand</a></li>
             <li><a href="#">Datenschutz</a></li>
           </ul>
         </div>
         <div class="footer-section">
           <h4>Kontakt</h4>
-          <p>support@meinshop.de</p>
+          <p>support@cotyora.de</p>
           <p>Mo-Fr 9:00-17:00 Uhr</p>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2025 MeinShop. Alle Rechte vorbehalten.</p>
+        <p>&copy; 2026 COTYORA. Alle Rechte vorbehalten.</p>
       </div>
     </div>
   </footer>

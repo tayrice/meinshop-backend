@@ -162,18 +162,16 @@ app.post('/api/admin/login', (req, res) => {
 
 // ── Produkte ──
 const PRODUCTS = [
-  {id:1, name:'Kopfhörer Pro', price:129, stock:10},
-  {id:2, name:'Smartwatch X2', price:249, stock:5},
-  {id:3, name:'USB-C Hub 7-Port', price:39, stock:20},
-  {id:4, name:'Bluetooth Lautsprecher', price:79, stock:15},
-  {id:5, name:'Laptop Ständer', price:49, stock:12},
-  {id:6, name:'Winterjacke', price:89, stock:8},
-  {id:7, name:'Laufschuhe', price:119, stock:6},
-  {id:8, name:'Yoga-Matte', price:29, stock:25},
-  {id:9, name:'Küchenmaschine', price:199, stock:4},
-  {id:10, name:'Kaffeemaschine', price:159, stock:7},
-  {id:11, name:'Roman: Nordlicht', price:14, stock:30},
-  {id:12, name:'Fahrradhelm', price:69, stock:9},
+  {id:1, name:'Glow Starter Serum', price:34, stock:38},
+  {id:2, name:'Hydra Balance Serum', price:39, stock:32},
+  {id:3, name:'Retinal Night Repair', price:49, stock:21},
+  {id:4, name:'Calm Barrier Drops', price:37, stock:27},
+  {id:5, name:'Vitamin C Radiance 12%', price:45, stock:24},
+  {id:6, name:'Peptide Lift Concentrate', price:59, stock:16},
+  {id:7, name:'Hyaluron Cloud Essence', price:41, stock:28},
+  {id:8, name:'Niacinamide Pore Refine', price:36, stock:20},
+  {id:9, name:'COTYORA Discovery Set', price:89, stock:12},
+  {id:10, name:'Golden Recovery Elixir', price:79, stock:10},
 ];
 
 const PRODUCTS_BY_ID = new Map(PRODUCTS.map((product) => [product.id, product]));

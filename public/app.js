@@ -7,18 +7,24 @@ let cardElement = null;
 
 // Kategorien für Produkte
 const productCategories = {
-  'Kopfhörer Pro': 'electronics',
-  'Smartwatch X2': 'electronics',
-  'USB-C Hub 7-Port': 'electronics',
-  'Bluetooth Lautsprecher': 'electronics',
-  'Laptop Ständer': 'electronics',
-  'Winterjacke': 'clothing',
-  'Laufschuhe': 'clothing',
-  'Yoga-Matte': 'home',
-  'Küchenmaschine': 'home',
-  'Kaffeemaschine': 'home',
-  'Roman: Nordlicht': 'books',
-  'Fahrradhelm': 'electronics'
+  'Glow Starter Serum': 'brightening',
+  'Hydra Balance Serum': 'hydration',
+  'Retinal Night Repair': 'antiaging',
+  'Calm Barrier Drops': 'sensitive',
+  'Vitamin C Radiance 12%': 'brightening',
+  'Peptide Lift Concentrate': 'antiaging',
+  'Hyaluron Cloud Essence': 'hydration',
+  'Niacinamide Pore Refine': 'sensitive',
+  'COTYORA Discovery Set': 'sets',
+  'Golden Recovery Elixir': 'antiaging'
+};
+
+const categoryTags = {
+  hydration: 'Hydra',
+  antiaging: 'Lift',
+  brightening: 'Glow',
+  sensitive: 'Calm',
+  sets: 'Set'
 };
 
 // Scroll to Section
@@ -142,13 +148,15 @@ function displayProducts(productsToShow) {
   }
 
   productsToShow.forEach(product => {
-    const emojis = ['🎧', '⌚', '🔌', '🔊', '🖥️', '🧥', '👟', '🧘', '🍳', '☕', '📚', '🚴'];
-    const emoji = emojis[product.id - 1] || '📦';
+    const category = productCategories[product.name] || 'hydration';
+    const categoryTag = categoryTags[category] || 'Serum';
 
     const card = document.createElement('div');
     card.className = 'product-card';
     card.innerHTML = `
-      <div class="product-image">${emoji}</div>
+      <div class="product-image" data-fly="✦">
+        <span class="product-tag">${categoryTag}</span>
+      </div>
       <div class="product-info">
         <div class="product-name">${product.name}</div>
         <div class="product-price">${product.price.toFixed(2)} €</div>
@@ -220,7 +228,7 @@ function animateProductToCart(sourceButton) {
 
   const flyingItem = document.createElement('div');
   flyingItem.className = 'fly-to-cart-item';
-  flyingItem.textContent = productImage.textContent.trim() || '🛍️';
+  flyingItem.textContent = productImage.dataset.fly || '✦';
 
   flyingItem.style.left = `${sourceRect.left + sourceRect.width / 2}px`;
   flyingItem.style.top = `${sourceRect.top + sourceRect.height / 2}px`;
@@ -336,7 +344,7 @@ function closeCheckout() {
 
 // Filter
 document.getElementById('priceFilter')?.addEventListener('input', function() {
-  document.getElementById('priceValue').textContent = `bis ${this.value}€`;
+  document.getElementById('priceValue').textContent = `bis ${this.value} EUR`;
   applyFilters();
 });
 
@@ -359,8 +367,8 @@ function applyFilters() {
 }
 
 function resetFilters() {
-  document.getElementById('priceFilter').value = 300;
-  document.getElementById('priceValue').textContent = 'bis 300€';
+  document.getElementById('priceFilter').value = 180;
+  document.getElementById('priceValue').textContent = 'bis 180 EUR';
   document.getElementById('categoryFilter').value = 'all';
   document.getElementById('searchInput').value = '';
   displayProducts(products);
